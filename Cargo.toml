@@ -7,18 +7,13 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
- tokio = "0.2.0-alpha.2"
+tokio = "0.2.0-alpha.2"
 telegram-bot = { git = "https://github.com/telegram-rs/telegram-bot/" }
 hyper = { git = "https://github.com/hyperium/hyper.git"}
 hyper-tls = { git = "https://github.com/hyperium/hyper-tls.git"}
 futures-preview = "=0.3.0-alpha.18"
 log = "0.4.8"
 env_logger = "0.6.2"
-serde = { version = "1.0", features = ["derive"] }
 failure = "0.1.5"
 urlencoding = "1.0.0"
-uuid = { version = "0.7.4", features = ["v4"] }
-hmac = "0.7.1"
-sha2 = "0.8.0"
-hex = "0.3.2"
-serde_json = "1.0.40"
+select = "0.4.3"
