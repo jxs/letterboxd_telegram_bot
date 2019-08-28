@@ -1,7 +1,7 @@
 use failure::{format_err, Error};
 use futures::TryStreamExt;
 use hyper::Client;
-use hyper_tls::HttpsConnector;
+use hyper_rustls::HttpsConnector;
 use select::document::Document;
 use select::node::Node;
 use select::predicate::{Class, Name, Predicate};
@@ -10,8 +10,8 @@ use telegram_bot::{InlineQueryResult, InlineQueryResultArticle, InputTextMessage
 const LETTERBOXD_URL: &str = "https://letterboxd.com";
 
 pub async fn search(query: &str) -> Result<Vec<InlineQueryResult>, Error> {
-    let https = HttpsConnector::new(1)?;
-    let client = Client::builder().build::<_, hyper::Body>(https);
+    let https = HttpsConnector::new(1);
+    let client: Client<_, hyper::Body> = Client::builder().build(https);
 
     let url = format!("{}/search/{}/", LETTERBOXD_URL, urlencoding::encode(&query))
         .parse::<hyper::Uri>()
