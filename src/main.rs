@@ -8,7 +8,7 @@ use tokio::timer::Timeout;
 use letterboxd::Api as LetterboxdApi;
 use telegram_bot::{
     Api as TelegramBotApi, CanAnswerInlineQuery,
-    CanReplySendMessage, InlineQueryResult, Update, UpdateKind,
+    CanReplySendMessage, InlineQuery, InlineQueryResult, Update, UpdateKind,
 };
 
 #[tokio::main]
@@ -31,28 +31,7 @@ async fn main() {
             Ok(Update {
                 kind: UpdateKind::InlineQuery(query),
                 ..
-            }) => match Timeout::new(letterboxd_api.search(&query.query), Duration::new(5, 0)).await {
-                Ok(Ok(results)) => {
-                    let reply = query.answer(results);
-                    let res = telegram_api.send(reply).await;
-                    if let Err(err) = res {
-                        log::error!("telegram bot send error, {:?}", err);
-
-                    }
-                }
-                Err(_elapsed) => {
-                    log::error!("request to letterboxd Api timedout after 5 seconds");
-                    let empty: Vec<InlineQueryResult> = vec![];
-                    let reply = query.answer(empty);
-                    let res = telegram_api.send(reply).await;
-                    if let Err(err) = res {
-                        log::error!("telegram bot send error, {:?}", err);
-                    }
-                }
-                Ok(Err(err)) => {
-                    log::error!("update error, {}", err);
-                }
-            },
+            }) => {tokio::spawn(fetch_query_send(telegram_api.clone(), letterboxd_api.clone(), query));},
             Ok(Update {
                 kind: UpdateKind::Message(message),
                 ..
@@ -70,6 +49,32 @@ async fn main() {
                 log::error!("update error, {}", err);
             }
             _ => {}
+        }
+    }
+}
+
+
+async fn fetch_query_send(telegram_api: TelegramBotApi, letterboxd_api: LetterboxdApi, query: InlineQuery) {
+    match Timeout::new(letterboxd_api.search(&query.query), Duration::new(5, 0)).await {
+        Ok(Ok(results)) => {
+            let reply = query.answer(results);
+            let res = telegram_api.send(reply).await;
+            if let Err(err) = res {
+                log::error!("telegram bot send error, {:?}", err);
+
+            }
+        }
+        Err(_elapsed) => {
+            log::error!("request to letterboxd Api timedout after 5 seconds");
+            let empty: Vec<InlineQueryResult> = vec![];
+            let reply = query.answer(empty);
+            let res = telegram_api.send(reply).await;
+            if let Err(err) = res {
+                log::error!("telegram bot send error, {:?}", err);
+            }
+        }
+        Ok(Err(err)) => {
+            log::error!("update error, {}", err);
         }
     }
 }

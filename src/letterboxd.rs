@@ -38,6 +38,7 @@ pub struct Link {
     url: String,
 }
 
+#[derive(Debug, Clone)]
 pub struct Api {
     key: String,
     secret: String,
@@ -112,7 +113,7 @@ pub fn film_to_article(mut film: Film) -> InlineQueryResultArticle {
         disable_web_page_preview: false,
     };
 
-    if film.links.len() > 0 {
+    if !film.links.is_empty() {
         message.message_text = film.links.remove(0).url;
     }
 
